@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Research | CryptoVault</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+
+<!-- Auth guard -->
+<script>
+    if (!localStorage.getItem("session_token")) {
+        window.location.href = "/";
+    }
+</script>
+
+<div class="research-container">
+
+    <!-- Top Card -->
+    <div class="container">
+
+        <div class="logo">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2L4 6v6c0 5 3.8 9.7 8 10 4.2-.3 8-5 8-10V6l-8-4z"/>
+            </svg>
+        </div>
+
+        <div class="badge">Research</div>
+
+        <h2>Hybrid MDH + RSA Cryptography</h2>
+        <p class="subtitle">Secure communication using dual-layer encryption</p>
+
+        <div class="divider"></div>
+
+        <!-- Tabs -->
+        <div class="research-tabs">
+            <div class="research-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</div>
+            <div class="research-tab" data-tab="algorithm" onclick="switchTab('algorithm')">Algorithm</div>
+            <div class="research-tab" data-tab="results" onclick="switchTab('results')">Results</div>
+        </div>
+
+    </div>
+
+    <!-- ================= OVERVIEW ================= -->
+    <div id="overview" class="research-section research-content">
+
+        <div class="research-title">Overview</div>
+
+        <p class="research-text">
+            This project implements a <span class="research-highlight">hybrid cryptographic system</span> 
+            combining Modified Diffie-Hellman (MDH) and RSA algorithms. The system enhances 
+            security by integrating key exchange with encryption mechanisms.
+        </p>
+
+        <p class="research-text">
+            Unlike traditional Diffie-Hellman, this approach introduces authentication during 
+            key exchange and prevents <span class="research-highlight">man-in-the-middle attacks</span>. 
+            The RSA algorithm then uses securely generated prime numbers from MDH for encryption.
+        </p>
+
+    </div>
+
+    <!-- ================= ALGORITHM ================= -->
+    <div id="algorithm" class="research-section research-content" style="display:none;">
+
+        <div class="research-title">Algorithm Steps</div>
+
+        <div class="research-steps">
+
+            <div class="research-step">1. User A generates prime P and sends Pn = P × 2</div>
+            <div class="research-step">2. User B generates Q and sends Qn = P + Q</div>
+            <div class="research-step">3. User A recovers Q from Qn</div>
+            <div class="research-step">4. Both users generate public keys (PubA, PubB)</div>
+            <div class="research-step">5. Secret keys are computed independently</div>
+            <div class="research-step">6. If keys match → communication continues</div>
+            <div class="research-step">7. RSA uses generated P and Q for encryption</div>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <p class="research-text">
+            This ensures both <span class="research-highlight">authentication and confidentiality</span>, 
+            making the system resistant to impersonation and interception attacks :contentReference[oaicite:1]{index=1}.
+        </p>
+
+    </div>
+
+    <!-- ================= RESULTS ================= -->
+    <div id="results" class="research-section research-content" style="display:none;">
+
+        <div class="research-title">Performance Comparison</div>
+
+        <table class="research-table">
+            <tr>
+                <th>Key Size</th>
+                <th>MDH Time</th>
+                <th>CDH Time</th>
+                <th>Improvement</th>
+            </tr>
+            <tr>
+                <td>64-bit</td>
+                <td>27.7 sec</td>
+                <td>88.5 sec</td>
+                <td>68%</td>
+            </tr>
+            <tr>
+                <td>128-bit</td>
+                <td>66.7 sec</td>
+                <td>165.5 sec</td>
+                <td>59%</td>
+            </tr>
+            <tr>
+                <td>512-bit</td>
+                <td>271 sec</td>
+                <td>603 sec</td>
+                <td>54%</td>
+            </tr>
+        </table>
+
+        <!-- Performance Chart -->
+        <canvas id="performanceChart" style="margin-top: 24px; max-height: 280px;"></canvas>
+
+        <div class="divider"></div>
+
+        <p class="research-text">
+            The Modified Diffie-Hellman algorithm significantly reduces computation time 
+            compared to classical DH, while maintaining strong security guarantees :contentReference[oaicite:2]{index=2}.
+        </p>
+
+    </div>
+
+</div>
+
+<!-- JS -->
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='charts.js') }}"></script>
+
+</body>
+</html>

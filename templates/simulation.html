@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulation | CryptoVault</title>
+
+    <!-- Your main design system -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+
+<!-- Auth guard -->
+<script>
+    if (!localStorage.getItem("session_token")) {
+        window.location.href = "/";
+    }
+</script>
+
+<div class="sim-container">
+
+    <!-- Top Card -->
+    <div class="container">
+
+        <!-- Logo -->
+        <div class="logo">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2L4 6v6c0 5 3.8 9.7 8 10 4.2-.3 8-5 8-10V6l-8-4z"/>
+            </svg>
+        </div>
+
+        <div class="badge">Simulation</div>
+
+        <h2>MDH + RSA Visualizer</h2>
+        <p class="subtitle">Step-by-step secure communication flow</p>
+
+        <div class="divider"></div>
+
+        <!-- Actions -->
+        <div class="sim-actions">
+
+            <div class="input-group" style="margin:0; flex:1;">
+                <input type="text" id="simMessage" placeholder="Enter message to encrypt..." value="Sample CryptoVault Data">
+            </div>
+
+            <button class="btn-primary" onclick="startSimulation()" style="width: auto; padding: 0 32px;">
+                Start Simulation
+            </button>
+
+            <!-- MITM Toggle -->
+            <div class="sim-toggle">
+                <span>MITM Attack</span>
+
+                <label class="switch">
+                    <input type="checkbox" onchange="toggleAttack(this)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+        </div>
+
+        <!-- Security Indicators -->
+        <div class="security-row">
+            <div class="security-tag">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 2L4 6v6c0 5 3.8 9.7 8 10 4.2-.3 8-5 8-10V6l-8-4z"/>
+                </svg>
+                MDH Exchange
+            </div>
+
+            <div class="security-tag">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                </svg>
+                RSA Encryption
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Simulation Output -->
+    <div class="sim-card">
+
+        <div class="sim-title">Simulation Steps</div>
+
+        <div id="steps" class="sim-steps">
+            <!-- Steps will appear here dynamically -->
+        </div>
+
+    </div>
+
+</div>
+
+<!-- JS -->
+<script src="{{ url_for('static', filename='simulation.js') }}"></script>
+
+</body>
+</html>

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoVault — Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Dashboard-specific layout */
+        body {
+            align-items: flex-start;
+            overflow-y: auto;
+        }
+
+        .dashboard-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 860px;
+            padding: 40px 24px 60px;
+            margin: 0 auto;
+            animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        /* Top navigation bar */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 36px;
+        }
+
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-logo {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+        }
+
+        .topbar-logo svg {
+            width: 20px;
+            fill: white;
+        }
+
+        .topbar-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .topbar-title span {
+            color: #818cf8;
+        }
+
+        /* Status pill */
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.25);
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            color: #4ade80;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 6px #22c55e;
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+        }
+
+        /* Stat Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 22px 24px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(99,102,241,0.4);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-sub {
+            font-size: 0.76rem;
+            color: #4ade80;
+            margin-top: 4px;
+        }
+
+        .stat-icon {
+            float: right;
+            font-size: 1.6rem;
+            margin-top: -2px;
+        }
+
+        /* Main Panel */
+        .panel {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        /* Session info rows */
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(99,102,241,0.08);
+            font-size: 0.85rem;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-key {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .info-val {
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82rem;
+            word-break: break-all;
+            text-align: right;
+            max-width: 55%;
+        }
+
+        .info-val.green  { color: #4ade80; }
+        .info-val.purple { color: #a78bfa; }
+
+        /* Activity log */
+        .log-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(99,102,241,0.08);
+            font-size: 0.83rem;
+        }
+
+        .log-item:last-child { border-bottom: none; }
+
+        .log-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .log-text { color: #94a3b8; flex: 1; }
+        .log-time { color: #475569; font-size: 0.76rem; }
+
+        /* Logout button area */
+        .logout-area {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Auth guard -->
+<script>
+    if (!localStorage.getItem("session_token")) {
+        window.location.href = "/";
+    }
+</script>
+
+<div class="dashboard-wrapper">
+
+    <!-- Top Nav -->
+    <div class="topbar">
+        <div class="topbar-brand">
+            <div class="topbar-logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z"/>
+                </svg>
+            </div>
+            <div>
+                <div class="topbar-title">CryptoVault <span>Secure</span></div>
+            </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div class="status-pill">
+                <div class="status-dot"></div>
+                Session Active
+            </div>
+            <button class="btn-secondary" onclick="logout()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">🔐</div>
+            <div class="stat-label">Encryption</div>
+            <div class="stat-value">AES-256</div>
+            <div class="stat-sub">✓ Active</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🛡️</div>
+            <div class="stat-label">Auth Method</div>
+            <div class="stat-value">Bcrypt</div>
+            <div class="stat-sub">✓ Verified</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-label">Session Status</div>
+            <div class="stat-value">Secure</div>
+            <div class="stat-sub">✓ Authenticated</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-label">Strength Score</div>
+            <div class="stat-value" id="strengthVal">98%</div>
+            <div class="stat-sub" style="color: #6366f1;">
+                <div style="width:100%; height:4px; background:rgba(99,102,241,0.2); border-radius:10px; margin-top:6px;">
+                    <div style="width:98%; height:100%; background:#6366f1; border-radius:10px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Audit Panel -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">Security Audit</div>
+            <div class="badge" style="background:#4ade8022; color:#4ade80; border-color:#4ade8044;">Pass</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="info-row">
+                <span class="info-key">Entropy Source</span>
+                <span class="info-val green">Hardware Prime</span>
+            </div>
+            <div class="info-row">
+                <span class="info-key">Key Exchange</span>
+                <span class="info-val purple">Hybrid MDH</span>
+            </div>
+            <div class="info-row">
+                <span class="info-key">Data Integrity</span>
+                <span class="info-val">SHA-256 Sig</span>
+            </div>
+            <div class="info-row">
+                <span class="info-key">Audit Frequency</span>
+                <span class="info-val">Real-time</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Info Panel -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">Session Information</div>
+            <div class="badge" style="margin:0;">Active</div>
+        </div>
+
+        <div class="info-row">
+            <span class="info-key">Session Token</span>
+            <span class="info-val purple" id="tokenVal">—</span>
+        </div>
+        <div class="info-row">
+            <span class="info-key">Login Time</span>
+            <span class="info-val" id="loginTime">—</span>
+        </div>
+        <div class="info-row">
+            <span class="info-key">Protocol</span>
+            <span class="info-val green">HTTPS / AES-GCM</span>
+        </div>
+        <div class="info-row">
+            <span class="info-key">Status</span>
+            <span class="info-val green">Authenticated ✓</span>
+        </div>
+    </div>
+
+    <!-- Secure Asset Vault Panel -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">Secure Asset Vault</div>
+            <div class="badge" style="background:rgba(129,140,248,0.1); color:#818cf8; border-color:rgba(129,140,248,0.3);">E2EE Active</div>
+        </div>
+
+        <div style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; gap: 10px;">
+                <select id="shareUserSelect" style="flex:1; padding: 10px; border-radius: 8px; background: rgba(15,23,42,0.5); border: 1px solid rgba(99,102,241,0.3); color: #e2e8f0; outline: none;">
+                    <option value="">🔒 Private (Do not share)</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <input type="file" id="vaultFile" style="display:none;" onchange="uploadAsset()">
+                <button class="btn-primary" style="margin:0; flex:1;" onclick="document.getElementById('vaultFile').click()">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:8px;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Upload Encrypted Asset
+                </button>
+                <button class="btn-secondary" onclick="refreshVault()">
+                    🔄 Refresh
+                </button>
+            </div>
+        </div>
+
+
+        <div id="vaultList">
+            <p style="font-size: 0.8rem; color: #475569; text-align: center; padding: 20px;">No assets in vault</p>
+        </div>
+    </div>
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">Activity Log</div>
+        </div>
+
+        <div class="log-item">
+            <div class="log-dot" style="background:#4ade80;"></div>
+            <div class="log-text">Login successful — session token issued</div>
+            <div class="log-time" id="logTime1">—</div>
+        </div>
+        <div class="log-item">
+            <div class="log-dot" style="background:#818cf8;"></div>
+            <div class="log-text">Secure channel verified</div>
+            <div class="log-time" id="logTime2">—</div>
+        </div>
+        <div class="log-item">
+            <div class="log-dot" style="background:#f59e0b;"></div>
+            <div class="log-text">Dashboard accessed</div>
+            <div class="log-time" id="logTime3">Just now</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function logout() {
+        localStorage.removeItem("session_token");
+        window.location.href = "/";
+    }
+
+    // Populate session info
+    const token = localStorage.getItem("session_token");
+    if (token) {
+        document.getElementById("tokenVal").textContent =
+            token.length > 28 ? token.substring(0, 28) + "..." : token;
+    }
+
+    const now = new Date();
+    const fmt = (d) => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const fmt2= (d) => d.toLocaleDateString([], { day:'numeric', month:'short' }) + " · " + fmt(d);
+
+    document.getElementById("loginTime").textContent  = fmt2(now);
+    document.getElementById("logTime1").textContent   = fmt(now);
+    document.getElementById("logTime2").textContent   = fmt(now);
+
+    // Vault Logic
+    async function refreshVault() {
+        const res = await fetch("/vault/list");
+        const files = await res.json();
+        const list = document.getElementById("vaultList");
+        
+        if (files.length === 0) {
+            list.innerHTML = `<p style="font-size: 0.8rem; color: #475569; text-align: center; padding: 20px;">No assets in vault</p>`;
+            return;
+        }
+
+        list.innerHTML = files.map(f => `
+            <div class="info-row">
+                <span class="info-key">${f.name} <br><small style="font-size:10px">${(f.size/1024).toFixed(1)} KB | <strong style="color:#818cf8;">${f.owner}</strong></small></span>
+                <a href="/vault/download/${f.name}" class="info-val green" style="text-decoration:none">Download 🛡️</a>
+            </div>
+        `).join('');
+    }
+
+    async function uploadAsset() {
+        const fileInput = document.getElementById("vaultFile");
+        if (!fileInput.files[0]) return;
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        const shareSelect = document.getElementById("shareUserSelect");
+        if (shareSelect.value) {
+            formData.append("shared_with_id", shareSelect.value);
+        }
+
+        const res = await fetch("/vault/send", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await res.json();
+        if (result.filename) {
+            refreshVault();
+            alert("File SECURELY uploaded to vault!");
+        }
+    }
+
+    // User Share Loading
+    async function loadUsers() {
+        try {
+            const res = await fetch("/users");
+            if (res.ok) {
+                const users = await res.json();
+                const sel = document.getElementById("shareUserSelect");
+                users.forEach(u => {
+                    const opt = document.createElement("option");
+                    opt.value = u.id;
+                    opt.textContent = `Share with: ${u.username}`;
+                    sel.appendChild(opt);
+                });
+            }
+        } catch(e) { console.log(e); }
+    }
+
+    // Initial load
+    refreshVault();
+    loadUsers();
+</script>
+
+</body>
+</html>
